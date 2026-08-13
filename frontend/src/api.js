@@ -31,10 +31,17 @@ export const api = {
   updateMotorcycle: (id, payload) => request(`/motorcycles/${id}`, { method: 'PUT', body: payload }),
   deleteMotorcycle: (id) => request(`/motorcycles/${id}`, { method: 'DELETE' }),
 
-  createRental: (payload) => request('/rentals', { method: 'POST', body: payload }),
+  createRental: (payload) => request('/rentals', { method: 'POST', body: payload }), // { motorcycle_id, start_at, end_at }
+  approveRental: (id) => request(`/rentals/${id}/approve`, { method: 'PUT' }),
+  rejectRental: (id) => request(`/rentals/${id}/reject`, { method: 'PUT' }),
+  extendRental: (id) => request(`/rentals/${id}/extend`, { method: 'PUT' }),
   returnRental: (id) => request(`/rentals/${id}/return`, { method: 'PUT' }),
   myRentals: () => request('/rentals/mine'),
   allRentals: () => request('/rentals'),
+
+  myNotifications: () => request('/notifications'),
+  markNotificationRead: (id) => request(`/notifications/${id}/read`, { method: 'PUT' }),
+  markAllNotificationsRead: () => request('/notifications/read-all', { method: 'PUT' }),
 
   myPoints: () => request('/points/me'),
   leaderboard: () => request('/points/leaderboard'),

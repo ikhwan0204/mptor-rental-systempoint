@@ -7,13 +7,21 @@ dengan reward (baucar diskaun, jam percuma, dll).
 ## Ciri-ciri
 
 - **Auth**: Register & login (pelajar / admin), guna JWT
-- **Sewa motor**: Pelajar boleh sewa motosikal yang available, ikut jam
+- **Booking sistem**: Pelajar pilih **masa mula & masa habis** terus (atau "Sewa Sekarang" untuk mula serta-merta) — sistem auto kira harga ikut kadar sejam (rate) motor tu
+  - Contoh (motor RM5/jam): 2ptg-5ptg (3 jam) = RM15, 5ptg-6:30ptg (1.5 jam) = RM7, 8mlm-10:30mlm (2.5 jam) = RM12
+  - Harga di**bulatkan ke bawah** ke Ringgit terdekat
+  - Extend +30 minit — harga dikira semula ikut rate motor
+  - **Harga tak ditunjukkan** kat pelajar semasa status Pending — baru nampak lepas admin approve
+- **Approval flow**: Tempahan masuk status **Pending** → admin approve/reject → user dapat notification
+- **Slot blocking**: Bila satu slot dah ada pending/approved booking, orang lain **tak boleh** book waktu yang sama untuk motor tu
+- **Live countdown**: Bila rental approved & dah sampai waktu mula, ada timer baki masa real-time
+- **Notification bell**: Navbar ada loceng notification (auto poll setiap 10 saat) — bagitau user bila tempahan diluluskan/ditolak
 - **Points**: Auto dapat point bila pulangkan motor
   - 1 point per RM1 dibelanja
   - +5 point bonus kalau pulangkan on-time
 - **Rewards**: Tukar point dengan baucar / jam percuma, dapat kod redemption
 - **Leaderboard**: Papan pendahulu top point earners (gamification)
-- **Admin panel**: Urus senarai motosikal (tambah/padam/maintenance), tengok semua rekod sewaan
+- **Admin panel**: Tab "Pending Bookings" untuk approve/reject, urus senarai motosikal (tambah/padam/maintenance), tengok semua rekod sewaan
 
 ## Struktur Projek
 
@@ -56,10 +64,24 @@ kat `http://localhost:4000/api` (boleh ubah dalam fail `.env` — salin dari `.e
 ## Cara Guna
 
 1. **Daftar** akaun pelajar baru (atau login guna admin demo di atas)
-2. Kat halaman utama, pilih motosikal, set berapa jam, klik **Rent Now**
-3. Pergi **My Rentals**, klik **Return Motorcycle** bila dah settle — point terus masuk
-4. Tengok **Points & Rewards** untuk balance, history, leaderboard & tukar reward
-5. Login sebagai **admin** untuk tambah/urus motosikal & tengok semua rekod sewaan
+2. Kat halaman utama, pilih motosikal, tick **"Sewa sekarang"** atau pilih tarikh/masa lain, pilih tempoh, klik **Sewa Sekarang / Tempah**
+3. Tempahan akan **Pending** — tunggu admin approve (loceng 🔔 kat navbar akan bagitau bila status berubah)
+4. Login sebagai **admin**, pergi tab **Pending Bookings**, klik **Approve** atau **Reject**
+5. Balik login pelajar, pergi **My Rentals** — kalau approved & dah sampai waktu, ada countdown timer baki masa. Boleh **Extend +30min (RM2)** atau **Return Motorcycle** bila settle — point terus masuk
+6. Tengok **Points & Rewards** untuk balance, history, leaderboard & tukar reward
+
+## Logik Harga (boleh ubah)
+
+Dalam `backend/utils/pricing.js`:
+
+```js
+function calculatePrice(ratePerHour, durationMinutes) {
+  const hours = durationMinutes / 60;
+  return Math.floor(ratePerHour * hours); // bulat ke bawah ke RM terdekat
+}
+```
+
+Rate `ratePerHour` diambil dari kadar setiap motosikal (admin boleh ubah dalam tab Motorcycles).
 
 ## Logik Point (boleh ubah)
 

@@ -22,7 +22,7 @@ CREATE TABLE IF NOT EXISTS motorcycles (
   model TEXT NOT NULL,
   plate_number TEXT UNIQUE NOT NULL,
   rate_per_hour REAL NOT NULL,
-  status TEXT NOT NULL DEFAULT 'available', -- available | rented | maintenance
+  status TEXT NOT NULL DEFAULT 'available', -- available | maintenance (rented is derived from active bookings)
   image_url TEXT,
   created_at TEXT DEFAULT (datetime('now'))
 );
@@ -31,12 +31,14 @@ CREATE TABLE IF NOT EXISTS rentals (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   user_id INTEGER NOT NULL REFERENCES users(id),
   motorcycle_id INTEGER NOT NULL REFERENCES motorcycles(id),
-  hours_booked REAL NOT NULL,
+  start_at TEXT NOT NULL,       -- ISO datetime, requested/booked start
+  duration_minutes INTEGER NOT NULL,
+  end_at TEXT NOT NULL,         -- ISO datetime, start_at + duration
   total_price REAL NOT NULL,
-  status TEXT NOT NULL DEFAULT 'active', -- active | returned | cancelled
+  status TEXT NOT NULL DEFAULT 'pending', -- pending | approved | rejected | returned | cancelled
   points_earned INTEGER DEFAULT 0,
-  started_at TEXT DEFAULT (datetime('now')),
-  due_at TEXT,
+  requested_at TEXT DEFAULT (datetime('now')),
+  decided_at TEXT,
   returned_at TEXT
 );
 
@@ -62,6 +64,15 @@ CREATE TABLE IF NOT EXISTS redemptions (
   reward_id INTEGER NOT NULL REFERENCES rewards(id),
   code TEXT NOT NULL,
   used INTEGER NOT NULL DEFAULT 0,
+  created_at TEXT DEFAULT (datetime('now'))
+);
+
+CREATE TABLE IF NOT EXISTS notifications (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  user_id INTEGER NOT NULL REFERENCES users(id),
+  rental_id INTEGER REFERENCES rentals(id),
+  message TEXT NOT NULL,
+  is_read INTEGER NOT NULL DEFAULT 0,
   created_at TEXT DEFAULT (datetime('now'))
 );
 `);

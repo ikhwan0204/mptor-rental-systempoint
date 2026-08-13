@@ -1,6 +1,14 @@
 import { useEffect, useState } from 'react';
 import { api } from '../api';
 
+const STATUS_LABEL = {
+  pending: 'Menunggu Kelulusan',
+  approved: 'Diluluskan',
+  rejected: 'Ditolak',
+  returned: 'Selesai',
+  cancelled: 'Dibatalkan',
+};
+
 export default function Admin() {
   const [motorcycles, setMotorcycles] = useState([]);
   const [rentals, setRentals] = useState([]);
@@ -8,7 +16,8 @@ export default function Admin() {
   const [message, setMessage] = useState('');
   const [form, setForm] = useState({ model: '', plate_number: '', rate_per_hour: '' });
   const [saving, setSaving] = useState(false);
-  const [tab, setTab] = useState('motorcycles');
+  const [busyId, setBusyId] = useState(null);
+  const [tab, setTab] = useState('pending');
 
   async function load() {
     try {
@@ -22,6 +31,8 @@ export default function Admin() {
 
   useEffect(() => {
     load();
+    const interval = setInterval(load, 10000);
+    return () => clearInterval(interval);
   }, []);
 
   function update(field, value) {
@@ -68,6 +79,34 @@ export default function Admin() {
     }
   }
 
+  async function handleApprove(r) {
+    setBusyId(r.id);
+    setError('');
+    try {
+      await api.approveRental(r.id);
+      load();
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setBusyId(null);
+    }
+  }
+
+  async function handleReject(r) {
+    setBusyId(r.id);
+    setError('');
+    try {
+      await api.rejectRental(r.id);
+      load();
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setBusyId(null);
+    }
+  }
+
+  const pendingRentals = rentals.filter((r) => r.status === 'pending');
+
   return (
     <div className="page">
       <h1>Admin Panel</h1>
@@ -75,9 +114,37 @@ export default function Admin() {
       {message && <div className="success-box">{message}</div>}
 
       <div className="tabs">
+        <button className={tab === 'pending' ? 'tab active' : 'tab'} onClick={() => setTab('pending')}>
+          Pending Bookings {pendingRentals.length > 0 && `(${pendingRentals.length})`}
+        </button>
         <button className={tab === 'motorcycles' ? 'tab active' : 'tab'} onClick={() => setTab('motorcycles')}>Motorcycles</button>
         <button className={tab === 'rentals' ? 'tab active' : 'tab'} onClick={() => setTab('rentals')}>All Rentals</button>
       </div>
+
+      {tab === 'pending' && (
+        <div className="list">
+          {pendingRentals.map((r) => (
+            <div key={r.id} className="card rental-row">
+              <div>
+                <h3>{r.model} <span className="muted">({r.plate_number})</span></h3>
+                <p className="muted">{r.user_name} · {r.user_email}</p>
+                <p className="muted">
+                  {new Date(r.start_at).toLocaleString('ms-MY')} · {r.duration_minutes} minit · RM{r.total_price.toFixed(2)}
+                </p>
+              </div>
+              <div className="admin-actions">
+                <button className="btn-primary" onClick={() => handleApprove(r)} disabled={busyId === r.id}>
+                  Approve
+                </button>
+                <button className="btn-danger" onClick={() => handleReject(r)} disabled={busyId === r.id}>
+                  Reject
+                </button>
+              </div>
+            </div>
+          ))}
+          {pendingRentals.length === 0 && <p>Takde tempahan menunggu kelulusan buat masa ni.</p>}
+        </div>
+      )}
 
       {tab === 'motorcycles' && (
         <>
@@ -115,10 +182,12 @@ export default function Admin() {
               <div>
                 <h3>{r.model} <span className="muted">({r.plate_number})</span></h3>
                 <p className="muted">{r.user_name} · {r.user_email}</p>
-                <p className="muted">{r.hours_booked}h · RM{r.total_price.toFixed(2)}</p>
+                <p className="muted">
+                  {new Date(r.start_at).toLocaleString('ms-MY')} · {r.duration_minutes} minit · RM{r.total_price.toFixed(2)}
+                </p>
               </div>
               <div>
-                <span className={`status status-${r.status}`}>{r.status}</span>
+                <span className={`status status-${r.status}`}>{STATUS_LABEL[r.status] || r.status}</span>
                 {r.status === 'returned' && <p className="points-earned">+{r.points_earned} pts</p>}
               </div>
             </div>

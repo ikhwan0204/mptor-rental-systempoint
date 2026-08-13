@@ -4,13 +4,23 @@ const { requireAuth, requireAdmin } = require('../middleware/auth');
 
 const router = express.Router();
 
-// Public (logged-in) - list motorcycles
+// Compute live status: maintenance stays as-is; otherwise check if an approved
+// booking currently covers "now" -> rented; else available.
+function withLiveStatus(motorcycle) {
+  if (motorcycle.status === 'maintenance') return motorcycle;
+  const nowIso = new Date().toISOString();
+  const activeNow = db.prepare(`
+    SELECT id FROM rentals
+    WHERE motorcycle_id = ? AND status = 'approved' AND start_at <= ? AND ? < end_at
+  `).get(motorcycle.id, nowIso, nowIso);
+  return { ...motorcycle, status: activeNow ? 'rented' : 'available' };
+}
+
 router.get('/', requireAuth, (req, res) => {
   const motorcycles = db.prepare('SELECT * FROM motorcycles ORDER BY id DESC').all();
-  res.json(motorcycles);
+  res.json(motorcycles.map(withLiveStatus));
 });
 
-// Admin - add motorcycle
 router.post('/', requireAuth, requireAdmin, (req, res) => {
   const { model, plate_number, rate_per_hour, image_url } = req.body;
   if (!model || !plate_number || !rate_per_hour) {
@@ -22,7 +32,6 @@ router.post('/', requireAuth, requireAdmin, (req, res) => {
   res.status(201).json(db.prepare('SELECT * FROM motorcycles WHERE id = ?').get(info.lastInsertRowid));
 });
 
-// Admin - update motorcycle
 router.put('/:id', requireAuth, requireAdmin, (req, res) => {
   const { model, plate_number, rate_per_hour, status, image_url } = req.body;
   const existing = db.prepare('SELECT * FROM motorcycles WHERE id = ?').get(req.params.id);
@@ -41,7 +50,6 @@ router.put('/:id', requireAuth, requireAdmin, (req, res) => {
   res.json(db.prepare('SELECT * FROM motorcycles WHERE id = ?').get(req.params.id));
 });
 
-// Admin - delete motorcycle
 router.delete('/:id', requireAuth, requireAdmin, (req, res) => {
   db.prepare('DELETE FROM motorcycles WHERE id = ?').run(req.params.id);
   res.json({ success: true });

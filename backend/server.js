@@ -6,6 +6,7 @@ const authRoutes = require('./routes/auth');
 const motorcycleRoutes = require('./routes/motorcycles');
 const rentalRoutes = require('./routes/rentals');
 const pointsRoutes = require('./routes/points');
+const notificationRoutes = require('./routes/notifications');
 
 const app = express();
 app.use(cors());
@@ -17,6 +18,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/motorcycles', motorcycleRoutes);
 app.use('/api/rentals', rentalRoutes);
 app.use('/api/points', pointsRoutes);
+app.use('/api/notifications', notificationRoutes);
 
 app.use((err, req, res, next) => {
   console.error(err);
