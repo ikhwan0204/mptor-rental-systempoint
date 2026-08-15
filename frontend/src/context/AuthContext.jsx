@@ -30,8 +30,12 @@ export function AuthProvider({ children }) {
     setUser((prev) => (prev ? { ...prev, points } : prev));
   }
 
+  function updateUser(patch) {
+    setUser((prev) => (prev ? { ...prev, ...patch } : prev));
+  }
+
   return (
-    <AuthContext.Provider value={{ user, login, logout, updatePoints }}>
+    <AuthContext.Provider value={{ user, login, logout, updatePoints, updateUser }}>
       {children}
     </AuthContext.Provider>
   );

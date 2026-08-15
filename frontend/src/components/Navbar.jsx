@@ -81,6 +81,7 @@ export default function Navbar() {
           </div>
 
           <span className="points-badge">⭐ {user.points ?? 0} pts</span>
+          <Link to="/profile" className="profile-link">👤 Profile</Link>
           <button onClick={handleLogout} className="btn-ghost">Logout</button>
         </div>
       ) : (

@@ -21,6 +21,25 @@ router.get('/', requireAuth, (req, res) => {
   res.json(motorcycles.map(withLiveStatus));
 });
 
+// Weekly schedule for one motorcycle - shows booked slots for the next 7 days
+// so students can see at a glance which times are free. No personal info of
+// other students is exposed, just the time ranges that are taken.
+router.get('/:id/availability', requireAuth, (req, res) => {
+  const motorcycle = db.prepare('SELECT * FROM motorcycles WHERE id = ?').get(req.params.id);
+  if (!motorcycle) return res.status(404).json({ error: 'Motorcycle not found' });
+
+  const now = new Date();
+  const until = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
+
+  const bookings = db.prepare(`
+    SELECT start_at, end_at, status FROM rentals
+    WHERE motorcycle_id = ? AND status IN ('pending', 'approved') AND end_at >= ? AND start_at <= ?
+    ORDER BY start_at ASC
+  `).all(req.params.id, now.toISOString(), until.toISOString());
+
+  res.json({ motorcycle: withLiveStatus(motorcycle), bookings, rangeStart: now.toISOString(), rangeEnd: until.toISOString() });
+});
+
 router.post('/', requireAuth, requireAdmin, (req, res) => {
   const { model, plate_number, rate_per_hour, image_url } = req.body;
   if (!model || !plate_number || !rate_per_hour) {

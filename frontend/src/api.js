@@ -25,8 +25,12 @@ async function request(path, { method = 'GET', body, auth = true } = {}) {
 export const api = {
   register: (payload) => request('/auth/register', { method: 'POST', body: payload, auth: false }),
   login: (payload) => request('/auth/login', { method: 'POST', body: payload, auth: false }),
+  getProfile: () => request('/auth/me'),
+  updateProfile: (payload) => request('/auth/me', { method: 'PUT', body: payload }),
+  changePassword: (payload) => request('/auth/me/password', { method: 'PUT', body: payload }),
 
   getMotorcycles: () => request('/motorcycles'),
+  getAvailability: (motorcycleId) => request(`/motorcycles/${motorcycleId}/availability`),
   addMotorcycle: (payload) => request('/motorcycles', { method: 'POST', body: payload }),
   updateMotorcycle: (id, payload) => request(`/motorcycles/${id}`, { method: 'PUT', body: payload }),
   deleteMotorcycle: (id) => request(`/motorcycles/${id}`, { method: 'DELETE' }),

@@ -326,6 +326,93 @@ h1 { margin-top: 0; }
   font-weight: 600;
 }
 
+.schedule-btn {
+  margin-top: 10px;
+  width: 100%;
+  font-size: 0.82rem;
+}
+
+.profile-link {
+  color: #d1d5db;
+  text-decoration: none;
+  font-size: 0.9rem;
+  white-space: nowrap;
+}
+.profile-link:hover { color: white; }
+
+/* Availability timeline */
+.avail-card {
+  margin-top: 20px;
+  grid-column: 1 / -1;
+}
+.avail-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 6px;
+}
+.avail-header h3 { margin: 0; }
+.avail-legend {
+  display: flex;
+  gap: 16px;
+  font-size: 0.8rem;
+  color: var(--muted);
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+.dot {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 3px;
+  margin-right: 4px;
+  vertical-align: middle;
+}
+.dot-free { background: #dcfce7; border: 1px solid #86efac; }
+.dot-approved { background: #fca5a5; }
+.dot-pending { background: #fde68a; }
+
+.avail-days {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.avail-day-row {
+  display: grid;
+  grid-template-columns: 110px 1fr;
+  align-items: center;
+  gap: 12px;
+}
+.avail-day-label {
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+.avail-timeline {
+  position: relative;
+  height: 20px;
+  background: #dcfce7;
+  border-radius: 6px;
+  border: 1px solid #86efac;
+  overflow: hidden;
+}
+.avail-seg {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  background: #fca5a5;
+}
+.avail-seg-pending {
+  background: #fde68a;
+}
+.avail-hours-label {
+  grid-column: 2 / 3;
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.65rem;
+  color: var(--muted);
+  margin-top: -4px;
+}
+
 /* Toast */
 .toast {
   animation: slideDown 0.25s ease;

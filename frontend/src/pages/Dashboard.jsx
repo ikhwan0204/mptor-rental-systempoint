@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { api } from '../api';
+import AvailabilityView from '../components/AvailabilityView';
 
 function toLocalInputValue(date) {
   const pad = (n) => String(n).padStart(2, '0');
@@ -22,6 +23,7 @@ export default function Dashboard() {
   const [message, setMessage] = useState('');
   const [bookingId, setBookingId] = useState(null);
   const [forms, setForms] = useState({});
+  const [openAvailabilityId, setOpenAvailabilityId] = useState(null);
 
   function getForm(id) {
     return forms[id] || { rentNow: true, start: defaultStart(), end: defaultEnd() };
@@ -101,6 +103,21 @@ export default function Dashboard() {
                 {m.status === 'rented' ? 'Sedang disewa sekarang' : m.status}
               </span>
 
+              <button
+                className="btn-ghost schedule-btn"
+                onClick={() => {
+                  const next = openAvailabilityId === m.id ? null : m.id;
+                  setOpenAvailabilityId(next);
+                  if (next) {
+                    setTimeout(() => {
+                      document.getElementById('availability-panel')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }, 100);
+                  }
+                }}
+              >
+                {openAvailabilityId === m.id ? 'Sembunyi Jadual' : '📅 Lihat Jadual 7 Hari'}
+              </button>
+
               {canBook && (
                 <div className="booking-form">
                   <label className="checkbox-row">
@@ -146,6 +163,15 @@ export default function Dashboard() {
         })}
         {motorcycles.length === 0 && <p>No motorcycles available yet.</p>}
       </div>
+
+      {openAvailabilityId && (
+        <div id="availability-panel">
+          <AvailabilityView
+            motorcycleId={openAvailabilityId}
+            onClose={() => setOpenAvailabilityId(null)}
+          />
+        </div>
+      )}
     </div>
   );
 }

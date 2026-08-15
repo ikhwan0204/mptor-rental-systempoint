@@ -2,7 +2,7 @@ const express = require('express');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const db = require('../db');
-const { JWT_SECRET } = require('../middleware/auth');
+const { requireAuth, JWT_SECRET } = require('../middleware/auth');
 
 const router = express.Router();
 
@@ -37,6 +37,41 @@ router.post('/login', (req, res) => {
   const token = jwt.sign({ id: user.id, email: user.email, role: user.role }, JWT_SECRET, { expiresIn: '7d' });
   delete user.password;
   res.json({ token, user });
+});
+
+// Get my own profile
+router.get('/me', requireAuth, (req, res) => {
+  const user = db.prepare('SELECT id, name, email, student_id, role, points, created_at FROM users WHERE id = ?').get(req.user.id);
+  if (!user) return res.status(404).json({ error: 'User not found' });
+  res.json(user);
+});
+
+// Update my own profile (name, student_id)
+router.put('/me', requireAuth, (req, res) => {
+  const { name, student_id } = req.body;
+  if (!name) return res.status(400).json({ error: 'name is required' });
+
+  db.prepare('UPDATE users SET name = ?, student_id = ? WHERE id = ?').run(name, student_id || null, req.user.id);
+  const user = db.prepare('SELECT id, name, email, student_id, role, points, created_at FROM users WHERE id = ?').get(req.user.id);
+  res.json(user);
+});
+
+// Change my own password
+router.put('/me/password', requireAuth, (req, res) => {
+  const { current_password, new_password } = req.body;
+  if (!current_password || !new_password) {
+    return res.status(400).json({ error: 'current_password and new_password are required' });
+  }
+  if (new_password.length < 6) {
+    return res.status(400).json({ error: 'Password baru mesti sekurang-kurangnya 6 aksara' });
+  }
+  const user = db.prepare('SELECT * FROM users WHERE id = ?').get(req.user.id);
+  if (!bcrypt.compareSync(current_password, user.password)) {
+    return res.status(401).json({ error: 'Password semasa salah' });
+  }
+  const hashed = bcrypt.hashSync(new_password, 10);
+  db.prepare('UPDATE users SET password = ? WHERE id = ?').run(hashed, req.user.id);
+  res.json({ success: true });
 });
 
 module.exports = router;

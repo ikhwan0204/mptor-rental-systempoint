@@ -22,6 +22,8 @@ dengan reward (baucar diskaun, jam percuma, dll).
 - **Rewards**: Tukar point dengan baucar / jam percuma, dapat kod redemption
 - **Leaderboard**: Papan pendahulu top point earners (gamification)
 - **Admin panel**: Tab "Pending Bookings" untuk approve/reject, urus senarai motosikal (tambah/padam/maintenance), tengok semua rekod sewaan
+- **Profile**: Pelajar/admin boleh update nama, student ID, dan tukar password sendiri
+- **Jadual 7 Hari**: Setiap motosikal ada butang "Lihat Jadual 7 Hari" — timeline visual tunjuk slot mana available, mana dah ditempah (pending/approved), senang nak plan bila nak sewa
 
 ## Struktur Projek
 
@@ -69,6 +71,8 @@ kat `http://localhost:4000/api` (boleh ubah dalam fail `.env` — salin dari `.e
 4. Login sebagai **admin**, pergi tab **Pending Bookings**, klik **Approve** atau **Reject**
 5. Balik login pelajar, pergi **My Rentals** — kalau approved & dah sampai waktu, ada countdown timer baki masa. Boleh **Extend +30min (RM2)** atau **Return Motorcycle** bila settle — point terus masuk
 6. Tengok **Points & Rewards** untuk balance, history, leaderboard & tukar reward
+7. Klik **👤 Profile** untuk update nama/student ID atau tukar password
+8. Kat halaman utama, klik **📅 Lihat Jadual 7 Hari** pada mana-mana motor untuk tengok timeline — hijau = available, kuning = menunggu approval, merah = dah ditempah (approved)
 
 ## Logik Harga (boleh ubah)
 
