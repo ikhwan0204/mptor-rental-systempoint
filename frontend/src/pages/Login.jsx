@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { api } from '../api';
 import { useAuth } from '../context/AuthContext';
+import GoogleSignInButton from '../components/GoogleSignInButton';
 
 export default function Login() {
   const [email, setEmail] = useState('');
@@ -26,6 +27,11 @@ export default function Login() {
     }
   }
 
+  function handleGoogleSuccess(data) {
+    login(data.token, data.user);
+    navigate('/');
+  }
+
   return (
     <div className="auth-page">
       <form onSubmit={handleSubmit} className="card auth-card">
@@ -35,11 +41,17 @@ export default function Login() {
         <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
         <label>Password</label>
         <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required />
+        <p className="forgot-link">
+          <Link to="/forgot-password">Forgot password?</Link>
+        </p>
         <button type="submit" className="btn-primary" disabled={loading}>
           {loading ? 'Logging in...' : 'Log In'}
         </button>
+
+        <div className="divider"><span>atau</span></div>
+        <GoogleSignInButton onSuccess={handleGoogleSuccess} onError={setError} />
+
         <p className="switch-link">No account? <Link to="/register">Register here</Link></p>
-        <p className="hint">Admin demo: admin@university.edu / admin123</p>
       </form>
     </div>
   );

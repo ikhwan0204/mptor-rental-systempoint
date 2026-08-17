@@ -105,15 +105,7 @@ export default function Dashboard() {
 
               <button
                 className="btn-ghost schedule-btn"
-                onClick={() => {
-                  const next = openAvailabilityId === m.id ? null : m.id;
-                  setOpenAvailabilityId(next);
-                  if (next) {
-                    setTimeout(() => {
-                      document.getElementById('availability-panel')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                    }, 100);
-                  }
-                }}
+                onClick={() => setOpenAvailabilityId(openAvailabilityId === m.id ? null : m.id)}
               >
                 {openAvailabilityId === m.id ? 'Sembunyi Jadual' : '📅 Lihat Jadual 7 Hari'}
               </button>
@@ -165,12 +157,10 @@ export default function Dashboard() {
       </div>
 
       {openAvailabilityId && (
-        <div id="availability-panel">
-          <AvailabilityView
-            motorcycleId={openAvailabilityId}
-            onClose={() => setOpenAvailabilityId(null)}
-          />
-        </div>
+        <AvailabilityView
+          motorcycleId={openAvailabilityId}
+          onClose={() => setOpenAvailabilityId(null)}
+        />
       )}
     </div>
   );

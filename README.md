@@ -24,6 +24,8 @@ dengan reward (baucar diskaun, jam percuma, dll).
 - **Admin panel**: Tab "Pending Bookings" untuk approve/reject, urus senarai motosikal (tambah/padam/maintenance), tengok semua rekod sewaan
 - **Profile**: Pelajar/admin boleh update nama, student ID, dan tukar password sendiri
 - **Jadual 7 Hari**: Setiap motosikal ada butang "Lihat Jadual 7 Hari" — timeline visual tunjuk slot mana available, mana dah ditempah (pending/approved), senang nak plan bila nak sewa
+- **Lupa Password**: Link "Lupa password?" kat login page — hantar link reset ke email (guna Ethereal untuk testing kat localhost, tak perlu setup email sebenar)
+- **Login guna Google**: Butang "Continue with Google" kat login page (perlu setup Google Cloud Console dulu — lihat bahagian bawah)
 
 ## Struktur Projek
 
@@ -108,6 +110,36 @@ git push -u origin main
 ```
 
 `.gitignore` dah disediakan untuk `node_modules`, database file, dan `.env`.
+
+## Setup Google Login (optional)
+
+Kalau tak setup ni, butang Google akan **automatik tersembunyi** — sistem tetap jalan normal guna email/password je.
+
+1. Pergi [Google Cloud Console](https://console.cloud.google.com/)
+2. Buat project baru (atau guna project sedia ada)
+3. Pergi **APIs & Services** → **Credentials**
+4. Klik **Create Credentials** → **OAuth client ID**
+5. Kalau diminta setup "OAuth consent screen" dulu, pilih **External**, isi nama app & email, save
+6. Untuk **Application type**, pilih **Web application**
+7. Kat **Authorized JavaScript origins**, tambah:
+   ```
+   http://localhost:5173
+   ```
+8. Klik **Create** — copy **Client ID** yang keluar (bentuk dia macam `xxxxx.apps.googleusercontent.com`)
+9. Paste Client ID tu ke **dua** tempat:
+   - `backend/.env` → `GOOGLE_CLIENT_ID=xxxxx.apps.googleusercontent.com`
+   - `frontend/.env` → `VITE_GOOGLE_CLIENT_ID=xxxxx.apps.googleusercontent.com`
+10. Restart both backend & frontend (`npm start` / `npm run dev`)
+
+Butang "Continue with Google" akan muncul kat login page.
+
+## Nota Pasal Reset Password (Forgot Password)
+
+Sistem guna **Ethereal** (fake SMTP untuk testing) secara default — bila anda klik "Lupa Password" dan masukkan email, sistem akan:
+1. Cuba hantar email test via Ethereal, dan bagi **link preview** boleh klik terus dalam browser
+2. Kalau internet/WiFi block SMTP (contoh WiFi kampus), link reset tetap **di-log dalam terminal backend** — buka terminal tu untuk copy link secara manual
+
+Untuk guna email sebenar (production), isi `SMTP_HOST`, `SMTP_USER`, `SMTP_PASS` dalam `backend/.env` (contoh guna Gmail App Password) — sistem akan automatik guna SMTP sebenar bila config ni wujud.
 
 ## Nota Teknikal
 

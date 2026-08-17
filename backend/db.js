@@ -14,6 +14,9 @@ CREATE TABLE IF NOT EXISTS users (
   student_id TEXT,
   role TEXT NOT NULL DEFAULT 'student', -- student | admin
   points INTEGER NOT NULL DEFAULT 0,
+  google_id TEXT UNIQUE,
+  reset_token TEXT,
+  reset_token_expires TEXT,
   created_at TEXT DEFAULT (datetime('now'))
 );
 
@@ -76,6 +79,19 @@ CREATE TABLE IF NOT EXISTS notifications (
   created_at TEXT DEFAULT (datetime('now'))
 );
 `);
+
+// Safe migration: add new columns to existing databases that were created
+// before google_id / reset_token were introduced.
+const userColumns = db.prepare("PRAGMA table_info(users)").all().map((c) => c.name);
+if (!userColumns.includes('google_id')) {
+  db.exec('ALTER TABLE users ADD COLUMN google_id TEXT');
+}
+if (!userColumns.includes('reset_token')) {
+  db.exec('ALTER TABLE users ADD COLUMN reset_token TEXT');
+}
+if (!userColumns.includes('reset_token_expires')) {
+  db.exec('ALTER TABLE users ADD COLUMN reset_token_expires TEXT');
+}
 
 // Seed default rewards if empty
 const rewardCount = db.prepare('SELECT COUNT(*) as c FROM rewards').get().c;

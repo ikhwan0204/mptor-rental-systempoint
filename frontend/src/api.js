@@ -25,6 +25,9 @@ async function request(path, { method = 'GET', body, auth = true } = {}) {
 export const api = {
   register: (payload) => request('/auth/register', { method: 'POST', body: payload, auth: false }),
   login: (payload) => request('/auth/login', { method: 'POST', body: payload, auth: false }),
+  googleLogin: (id_token) => request('/auth/google', { method: 'POST', body: { id_token }, auth: false }),
+  forgotPassword: (email) => request('/auth/forgot-password', { method: 'POST', body: { email }, auth: false }),
+  resetPassword: (payload) => request('/auth/reset-password', { method: 'POST', body: payload, auth: false }),
   getProfile: () => request('/auth/me'),
   updateProfile: (payload) => request('/auth/me', { method: 'PUT', body: payload }),
   changePassword: (payload) => request('/auth/me/password', { method: 'PUT', body: payload }),
