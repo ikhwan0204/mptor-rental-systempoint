@@ -10,6 +10,8 @@ const notificationRoutes = require('./routes/notifications');
 
 const app = express();
 
+app.set('trust proxy', 1); // Railway (dan kebanyakan host) letak app di belakang proxy
+
 const allowedOrigins = [
   'http://localhost:5173',
   process.env.FRONTEND_URL,
