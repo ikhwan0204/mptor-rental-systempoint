@@ -15,8 +15,11 @@ const allowedOrigins = [
   process.env.FRONTEND_URL,
 ].filter(Boolean);
 
+const { generalLimiter } = require('./middleware/rateLimit');
+
 app.use(cors({ origin: allowedOrigins }));
 app.use(express.json());
+app.use(generalLimiter);
 
 app.get('/api/health', (req, res) => res.json({ ok: true }));
 

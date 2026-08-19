@@ -213,6 +213,12 @@ h1 { margin-top: 0; }
   justify-content: center;
 }
 
+.turnstile-container {
+  display: flex;
+  justify-content: center;
+  margin: 12px 0;
+}
+
 .error-box {
   background: #fee2e2;
   color: #991b1b;

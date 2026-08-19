@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { api } from '../api';
+import TurnstileWidget from '../components/TurnstileWidget';
 
 export default function ForgotPassword() {
   const [email, setEmail] = useState('');
@@ -8,6 +9,7 @@ export default function ForgotPassword() {
   const [message, setMessage] = useState('');
   const [previewUrl, setPreviewUrl] = useState('');
   const [error, setError] = useState('');
+  const [turnstileToken, setTurnstileToken] = useState('');
 
   async function handleSubmit(e) {
     e.preventDefault();
@@ -16,7 +18,7 @@ export default function ForgotPassword() {
     setMessage('');
     setPreviewUrl('');
     try {
-      const data = await api.forgotPassword(email);
+      const data = await api.forgotPassword(email, turnstileToken);
       setMessage(data.message);
       if (data.previewUrl) setPreviewUrl(data.previewUrl);
     } catch (err) {
@@ -40,6 +42,7 @@ export default function ForgotPassword() {
         )}
         <label>Email</label>
         <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
+        <TurnstileWidget onVerify={setTurnstileToken} />
         <button type="submit" className="btn-primary" disabled={loading}>
           {loading ? 'Sending...' : 'Send Reset Link'}
         </button>

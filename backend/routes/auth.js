@@ -7,13 +7,23 @@ const db = require('../db');
 const { requireAuth, JWT_SECRET } = require('../middleware/auth');
 const { sendPasswordResetEmail } = require('../utils/mailer');
 
+const { authLimiter } = require('../middleware/rateLimit');
+const { verifyTurnstileToken } = require('../utils/turnstile');
+
 const router = express.Router();
 const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
-router.post('/register', (req, res) => {
-  const { name, email, password, student_id } = req.body;
+router.use(authLimiter);
+
+router.post('/register', async (req, res) => {
+  const { name, email, password, student_id, turnstile_token } = req.body;
   if (!name || !email || !password) {
     return res.status(400).json({ error: 'name, email and password are required' });
+  }
+
+  const isHuman = await verifyTurnstileToken(turnstile_token, req.ip);
+  if (!isHuman) {
+    return res.status(400).json({ error: 'Pengesahan "bukan robot" gagal. Sila cuba lagi.' });
   }
   const existing = db.prepare('SELECT id FROM users WHERE email = ?').get(email);
   if (existing) {
@@ -45,8 +55,13 @@ router.post('/login', (req, res) => {
 
 // Request a password reset email
 router.post('/forgot-password', async (req, res) => {
-  const { email } = req.body;
+  const { email, turnstile_token } = req.body;
   if (!email) return res.status(400).json({ error: 'email is required' });
+
+  const isHuman = await verifyTurnstileToken(turnstile_token, req.ip);
+  if (!isHuman) {
+    return res.status(400).json({ error: 'Pengesahan "bukan robot" gagal. Sila cuba lagi.' });
+  }
 
   const user = db.prepare('SELECT * FROM users WHERE email = ?').get(email);
   // Always respond the same way whether or not the email exists, so we don't

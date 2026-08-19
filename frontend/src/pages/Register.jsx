@@ -2,11 +2,13 @@ import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { api } from '../api';
 import { useAuth } from '../context/AuthContext';
+import TurnstileWidget from '../components/TurnstileWidget';
 
 export default function Register() {
   const [form, setForm] = useState({ name: '', email: '', password: '', student_id: '' });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [turnstileToken, setTurnstileToken] = useState('');
   const { login } = useAuth();
   const navigate = useNavigate();
 
@@ -19,7 +21,7 @@ export default function Register() {
     setError('');
     setLoading(true);
     try {
-      const data = await api.register(form);
+      const data = await api.register({ ...form, turnstile_token: turnstileToken });
       login(data.token, data.user);
       navigate('/');
     } catch (err) {
@@ -42,6 +44,7 @@ export default function Register() {
         <input type="email" value={form.email} onChange={(e) => update('email', e.target.value)} required />
         <label>Password</label>
         <input type="password" value={form.password} onChange={(e) => update('password', e.target.value)} required minLength={6} />
+        <TurnstileWidget onVerify={setTurnstileToken} />
         <button type="submit" className="btn-primary" disabled={loading}>
           {loading ? 'Creating...' : 'Register'}
         </button>
