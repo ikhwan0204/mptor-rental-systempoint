@@ -37,4 +37,16 @@ app.use((err, req, res, next) => {
 });
 
 const PORT = process.env.PORT || 4000;
-app.listen(PORT, () => console.log(`Motor rental backend running on http://localhost:${PORT}`));
+const server = app.listen(PORT, () => console.log(`Motor rental backend running on http://localhost:${PORT}`));
+
+// Graceful shutdown — pastikan koneksi database ditutup betul-betul sebelum
+// proses exit, elak native crash dari better-sqlite3 semasa container restart.
+const db = require('./db');
+function shutdown() {
+  server.close(() => {
+    db.close();
+    process.exit(0);
+  });
+}
+process.on('SIGTERM', shutdown);
+process.on('SIGINT', shutdown);
