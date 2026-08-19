@@ -1,6 +1,9 @@
 {
   "name": "motor-rental-backend",
   "version": "1.0.0",
+  "engines": {
+    "node": "20.x"
+  },
   "description": "Backend for university motorcycle rental system with loyalty points",
   "main": "server.js",
   "type": "commonjs",
