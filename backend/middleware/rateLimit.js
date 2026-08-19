@@ -3,7 +3,7 @@ const rateLimit = require('express-rate-limit');
 // Untuk login/register/forgot-password — stricter, elak brute-force & spam
 const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minit
-  max: 10,
+  max: 5,
   standardHeaders: true,
   legacyHeaders: false,
   message: { error: 'Terlalu banyak percubaan. Sila cuba lagi selepas 15 minit.' },
